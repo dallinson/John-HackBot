@@ -51,11 +51,6 @@ client.on("messageCreate", async (message) => {
       const rate_limit_embed = new MessageEmbed()
         .setColor("RED")
         .setTitle("Two rate limit")
-        .setAuthor({
-          name: message.author.username,
-          iconURL:
-            message.author.avatarURL() ?? message.author.defaultAvatarURL,
-        })
         .setDescription(
           `${message.author} cannot be twoed again until <t:${
             Math.floor(user.last_two_time / 1000) + 600
