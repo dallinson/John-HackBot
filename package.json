@@ -1,0 +1,41 @@
+{
+  "name": "john_hackbot_ts",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "ts-node src/index.ts",
+    "lint": "eslint src/**/*.ts",
+    "format": "prettier ./src/**/*.ts --write",
+    "prepare": "husky install",
+    "prebuild": "yarn run format && yarn run lint",
+    "build": "tsc",
+    "pre-commit": "lint-staged && pretty-quick --staged",
+    "deploy-commands": "ts-node src/deploy-commands.ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@discordjs/builders": "^0.15.0",
+    "@discordjs/rest": "^0.5.0",
+    "@types/node-cron": "^3.0.2",
+    "chalk": "^5.0.1",
+    "chrono-node": "^2.3.9",
+    "discord-api-types": "^0.36.1",
+    "discord.js": "^13.8.1",
+    "dotenv": "^16.0.1",
+    "prettier": "^2.7.1",
+    "sequelize": "^6.21.2",
+    "sqlite3": "^5.0.8",
+    "ts-node": "^10.8.2",
+    "tsconfig": "^7.0.0",
+    "yarn": "^1.22.19"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.30.5",
+    "@typescript-eslint/parser": "^5.30.5",
+    "eslint": "^8.19.0",
+    "node-cron": "^3.0.1"
+  }
+}
