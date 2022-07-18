@@ -20,6 +20,7 @@
     "@discordjs/builders": "^0.15.0",
     "@discordjs/rest": "^0.5.0",
     "@types/node-cron": "^3.0.2",
+    "axios": "^0.27.2",
     "chalk": "^5.0.1",
     "chrono-node": "^2.3.9",
     "discord-api-types": "^0.36.1",
