@@ -22,11 +22,9 @@ export async function execute(interaction: CommandInteraction) {
   const two_user_ids = twoed_users.map(user => user.user_id);
   const contains_user_id = two_user_ids.includes(interaction.user.id);
   let two_string = '';
-  for (let i = 0; i < Math.min(twoed_users.length, 10); i++) {
-    two_string += `<@${twoed_users[i].user_id}>:   \` ${twoed_users[i].two_count} \`\n`;
-  }
   const leaderboard_embed = new MessageEmbed()
     .setTitle("Twoing Leaderboard")
-    .setDescription(two_string);
-  interaction.reply({ embeds: [leaderboard_embed], allowedMentions: { users: [] }, ephemeral: interaction.options.getBoolean("hidden") ?? false });
+    .addField("User", twoed_users.map(user => `<@${user.user_id}>`).join("\n"), true)
+    .addField("Two count", twoed_users.map(user => `\` ${user.two_count} \``).join("\n"), true);
+  interaction.reply({ embeds: [leaderboard_embed], allowedMentions: { users: [] }, ephemeral: interaction.options.getBoolean("hidden") ?? true});
 }

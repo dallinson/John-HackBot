@@ -1,7 +1,7 @@
 /** @format */
 
 // Require the necessary discord.js classes
-import { Client, Intents, MessageEmbed, TextChannel } from "discord.js";
+import { Client, Intents, MessageEmbed, Snowflake, TextChannel, User } from "discord.js";
 import { commands } from "./commands";
 import * as dotenv from "dotenv";
 import { database_tables, db } from "./database";
@@ -21,7 +21,6 @@ client.once("ready", () => {
 });
 
 client.on("interactionCreate", async (interaction) => {
-  console.log(interaction.type);
   if (!interaction.isCommand()) return;
 
   const command = commands.get(interaction.commandName);
@@ -30,8 +29,7 @@ client.on("interactionCreate", async (interaction) => {
 
   try {
     await command.execute(interaction);
-  }
-  catch (error) {
+  } catch (error) {
     console.error(error);
     await interaction.reply({
       content: "There was an error while executing this command!",
@@ -60,8 +58,7 @@ client.on("messageCreate", async (message) => {
         embeds: [rate_limit_embed],
         allowedMentions: { repliedUser: false },
       });
-    }
-    else {
+    } else {
       const reply_embed = new MessageEmbed()
         .setColor("RED")
         .setTitle(`Oops!  2 detected!`)
@@ -80,8 +77,7 @@ client.on("messageCreate", async (message) => {
         allowedMentions: { repliedUser: false },
       });
     }
-  }
-  else if (
+  } else if (
     message.author.id != client.user?.id &&
     message.content == "you know the drill"
   ) {
@@ -101,6 +97,8 @@ cron.schedule("* * * * *", async () => {
   reminders.forEach(async (reminder) => {
     const channel = client.channels.cache.get(reminder.channel_id);
     if (!(channel == undefined)) {
+      const reminder_users = reminder.reminder_message
+        .match(/<@!?[0-9]+>/g) ?? [];
       await (channel as TextChannel).send({
         embeds: [
           new MessageEmbed()
@@ -110,8 +108,13 @@ cron.schedule("* * * * *", async () => {
               `Reminder from <@${reminder.creator_id}>:\n\n ${reminder.reminder_message}`,
             ),
         ],
-        allowedMentions: { users: [] },
+        // embeds can never ping
       });
+      if (reminder_users.length != 0) {
+        await (channel as TextChannel).send(
+          `Reminder mentions: ${reminder_users.join(" ")}`
+        );
+      }
     }
   });
   await database_tables.channel_reminders.update(
