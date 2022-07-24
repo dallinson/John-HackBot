@@ -1,7 +1,15 @@
 /** @format */
 
 // Require the necessary discord.js classes
-import { Client, Intents, MessageEmbed, Snowflake, TextChannel, User } from "discord.js";
+import {
+  ButtonInteraction,
+  Client,
+  Intents,
+  MessageEmbed,
+  Snowflake,
+  TextChannel,
+  User,
+} from "discord.js";
 import { commands } from "./commands";
 import * as dotenv from "dotenv";
 import { database_tables, db } from "./database";
@@ -21,20 +29,40 @@ client.once("ready", () => {
 });
 
 client.on("interactionCreate", async (interaction) => {
-  if (!interaction.isCommand()) return;
+  if (interaction.inCachedGuild()) {
+    if (interaction.isCommand()) {
+      const command = commands.get(interaction.commandName);
 
-  const command = commands.get(interaction.commandName);
+      if (!command) return;
 
-  if (!command) return;
-
-  try {
-    await command.execute(interaction);
-  } catch (error) {
-    console.error(error);
-    await interaction.reply({
-      content: "There was an error while executing this command!",
-      ephemeral: true,
-    });
+      try {
+        await command.execute(interaction);
+      } catch (error) {
+        console.error(error);
+        await interaction.reply({
+          content: "There was an error while executing this command!",
+          ephemeral: true,
+        });
+      }
+    } else if (interaction.isButton()) {
+      const buttonJson: { kind: "give-role"; role: string } = JSON.parse(
+        interaction.customId,
+      );
+      if (buttonJson.kind == "give-role") {
+        const chosen_role = interaction.guild.roles.cache.get(buttonJson.role);
+        if (chosen_role == undefined) {
+          return;
+        }
+        const member_roles = interaction.member?.roles;
+        if (member_roles.cache.find(r => r.id == buttonJson.role) == undefined) {
+          member_roles.add(chosen_role);
+          await interaction.reply({ content: "Successfully granted role", ephemeral: true});
+        } else {
+          member_roles.remove(chosen_role);
+          await interaction.reply({ content: "Successfully removed role", ephemeral: true});
+        }
+      }
+    }
   }
 });
 
@@ -97,8 +125,8 @@ cron.schedule("* * * * *", async () => {
   reminders.forEach(async (reminder) => {
     const channel = client.channels.cache.get(reminder.channel_id);
     if (!(channel == undefined)) {
-      const reminder_users = reminder.reminder_message
-        .match(/<@!?[0-9]+>/g) ?? [];
+      const reminder_users =
+        reminder.reminder_message.match(/<@!?[0-9]+>/g) ?? [];
       await (channel as TextChannel).send({
         embeds: [
           new MessageEmbed()
@@ -112,7 +140,7 @@ cron.schedule("* * * * *", async () => {
       });
       if (reminder_users.length != 0) {
         await (channel as TextChannel).send(
-          `Reminder mentions: ${reminder_users.join(" ")}`
+          `Reminder mentions: ${reminder_users.join(" ")}`,
         );
       }
     }
