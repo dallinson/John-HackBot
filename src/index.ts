@@ -2,13 +2,10 @@
 
 // Require the necessary discord.js classes
 import {
-  ButtonInteraction,
   Client,
   Intents,
   MessageEmbed,
-  Snowflake,
   TextChannel,
-  User,
 } from "discord.js";
 import { commands } from "./commands";
 import * as dotenv from "dotenv";
@@ -54,12 +51,20 @@ client.on("interactionCreate", async (interaction) => {
           return;
         }
         const member_roles = interaction.member?.roles;
-        if (member_roles.cache.find(r => r.id == buttonJson.role) == undefined) {
+        if (
+          member_roles.cache.find((r) => r.id == buttonJson.role) == undefined
+        ) {
           member_roles.add(chosen_role);
-          await interaction.reply({ content: "Successfully granted role", ephemeral: true});
+          await interaction.reply({
+            content: "Successfully granted role",
+            ephemeral: true,
+          });
         } else {
           member_roles.remove(chosen_role);
-          await interaction.reply({ content: "Successfully removed role", ephemeral: true});
+          await interaction.reply({
+            content: "Successfully removed role",
+            ephemeral: true,
+          });
         }
       }
     }

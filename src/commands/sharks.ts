@@ -57,7 +57,7 @@ export async function execute(interaction: CommandInteraction) {
           itemKey: { itemNo: string; itemType: string };
         }[];
       }) => {
-        const sharks = data.availabilities
+        const sharks = (data.availabilities
           .map((element) => {
             const store_id = element.classUnitKey.classUnitCode;
             const store_name = store_info.find(
@@ -71,8 +71,8 @@ export async function execute(interaction: CommandInteraction) {
             const quantity = availability_info.quantity;
             return { store: store_name, quantity: quantity };
           })
-          .filter((elem) => elem != null)
-          .sort((a, b) => a!.quantity - b!.quantity)
+          .filter((elem) => elem != null) as { store: string, quantity: number }[])
+          .sort((a, b) => a.quantity - b.quantity)
           .reverse();
         let shark_colour = "LUMINOUS_VIVID_PINK" as ColorResolvable;
         if (sharks[sharks.length - 1]?.quantity == 0) {

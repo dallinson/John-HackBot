@@ -37,9 +37,15 @@ export async function execute(interaction: CommandInteraction) {
     ],
     components: [
       new MessageActionRow().addComponents(
-        new MessageButton().setLabel(role.name).setStyle("PRIMARY").setCustomId(`{"kind": "give-role", "role": "${role.id}"}`),
+        new MessageButton()
+          .setLabel(role.name)
+          .setStyle("PRIMARY")
+          .setCustomId(`{"kind": "give-role", "role": "${role.id}"}`),
       ),
     ],
   });
-  await interaction.reply({ content: "Successfully created button", ephemeral: true });
+  await interaction.reply({
+    content: "Successfully created button",
+    ephemeral: true,
+  });
 }

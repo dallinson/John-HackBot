@@ -90,8 +90,7 @@ export const metadata = new SlashCommandBuilder()
 export async function execute(interaction: CommandInteraction) {
   if (interaction.options.getSubcommand() == "channel") {
     await handle_channel_reminder(interaction);
-  }
-  else if (interaction.options.getSubcommand() == "list") {
+  } else if (interaction.options.getSubcommand() == "list") {
     await reminders.execute(interaction);
   }
 }
@@ -118,8 +117,7 @@ async function handle_channel_reminder(interaction: CommandInteraction) {
       ephemeral: true,
     });
     return;
-  }
-  else if (new Date(Date.now()) > reminder_time) {
+  } else if (new Date(Date.now()) > reminder_time) {
     await interaction.reply({
       embeds: [
         new MessageEmbed()
