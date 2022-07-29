@@ -104,7 +104,7 @@ async function handle_channel_reminder(interaction: CommandInteraction) {
   );
   if (interaction.inCachedGuild()) {
     const guildChannel = interaction.options.getChannel("where", true);
-    if (!guildChannel.permissionsFor(interaction.user)?.has("SEND_MESSAGES") && !guildChannel.permissionsFor(interaction.user)?.has("VIEW_CHANNEL")) {
+    if (!guildChannel.permissionsFor(interaction.user)?.has("SEND_MESSAGES") || !guildChannel.permissionsFor(interaction.user)?.has("VIEW_CHANNEL")) {
       await interaction.reply({ content: "you do not have permission for this channel", ephemeral: true });
       return;
     }
