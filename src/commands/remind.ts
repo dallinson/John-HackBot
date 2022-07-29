@@ -96,11 +96,19 @@ export async function execute(interaction: CommandInteraction) {
 }
 
 async function handle_channel_reminder(interaction: CommandInteraction) {
-  const channel_id = interaction.options.getChannel("where", true).id;
+  const channel = interaction.options.getChannel("where", true);
+  const channel_id = channel.id;
   const reminder_text = interaction.options.getString("what", true);
   const reminder_time = dateParser.parseDate(
     interaction.options.getString("when", true),
   );
+  if (interaction.inCachedGuild()) {
+    const guildChannel = interaction.options.getChannel("where", true);
+    if (!guildChannel.permissionsFor(interaction.user)?.has("SEND_MESSAGES") && !guildChannel.permissionsFor(interaction.user)?.has("VIEW_CHANNEL")) {
+      await interaction.reply({ content: "you do not have permission for this channel", ephemeral: true });
+      return;
+    }
+  }
   if (reminder_time == null) {
     await interaction.reply({
       embeds: [
