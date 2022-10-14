@@ -25,6 +25,12 @@ export const metadata = new SlashCommandBuilder()
       .setName("role")
       .setDescription("The role to create a button for")
       .setRequired(true),
+  )
+  .addStringOption((option) =>
+    option
+      .setName("text")
+      .setDescription("The text in the role creation embed description")
+      .setRequired(false),
   );
 
 export async function execute(interaction: CommandInteraction) {
@@ -33,12 +39,12 @@ export async function execute(interaction: CommandInteraction) {
     embeds: [
       new MessageEmbed()
         .setTitle(role.name)
-        .setDescription(`Get the ${role.name} role.`),
+        .setDescription(interaction.options.getString("text", false) ?? `Toggle the ${role.name} role.`),
     ],
     components: [
       new MessageActionRow().addComponents(
         new MessageButton()
-          .setLabel(role.name)
+          .setLabel(`Toggle the ${role.name} role.`)
           .setStyle("PRIMARY")
           .setCustomId(`{"kind": "give-role", "role": "${role.id}"}`),
       ),
