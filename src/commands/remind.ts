@@ -101,6 +101,8 @@ async function handle_channel_reminder(interaction: CommandInteraction) {
   const reminder_text = interaction.options.getString("what", true);
   const reminder_time = dateParser.parseDate(
     interaction.options.getString("when", true),
+    new Date(),
+    { forwardDate: true }
   );
   if (interaction.inCachedGuild()) {
     const guildChannel = interaction.options.getChannel("where", true);
