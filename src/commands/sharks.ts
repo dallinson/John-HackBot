@@ -14,12 +14,35 @@ const info = {
 
 export const metadata = new SlashCommandBuilder()
   .setName(info.name)
-  .setDescription(info.description);
+  .setDescription(info.description)
+  .addStringOption((option) =>
+    option
+      .setRequired(false)
+      .setName("size")
+      .setDescription(
+        "Whether to get the stock for 100cm Blahaj (Blahaj) or 55cm Blahaj (Smolhaj)",
+      )
+      .addChoices(
+        { name: "Blahaj", value: "30373588" },
+        { name: "Smolhaj", value: "20540663" },
+      ),
+  )
+  .addStringOption((option) =>
+    option
+      .setName("stores")
+      .setDescription("Only show stores where the BLAHAJ is in stock")
+      .addChoices(
+        {name: "All stores", value: "all"},
+        {name: "In stock only", value: "in-stock" },
+      ),
+  );
 
 export async function execute(interaction: CommandInteraction) {
   axios
     .get(
-      "https://api.ingka.ikea.com/cia/availabilities/ru/gb?itemNos=30373588&expand=StoresList,Restocks,SalesLocations",
+      "https://api.ingka.ikea.com/cia/availabilities/ru/gb?itemNos=" +
+        (interaction.options.getString("size", false) ?? "30373588") +
+        "&expand=StoresList,Restocks,SalesLocations",
       {
         headers: {
           Accept: "application/json;version=2",
@@ -57,21 +80,26 @@ export async function execute(interaction: CommandInteraction) {
           itemKey: { itemNo: string; itemType: string };
         }[];
       }) => {
-        const sharks = (data.availabilities
-          .map((element) => {
-            const store_id = element.classUnitKey.classUnitCode;
-            const store_name = store_info.find(
-              (elem) => elem.value == store_id,
-            )?.name;
-            if (store_name == undefined) {
-              return null;
-            }
-            const availability_info =
-              element.buyingOption.cashCarry.availability;
-            const quantity = availability_info.quantity;
-            return { store: store_name, quantity: quantity };
-          })
-          .filter((elem) => elem != null) as { store: string, quantity: number }[])
+        let sharks = (
+          data.availabilities
+            .map((element) => {
+              const store_id = element.classUnitKey.classUnitCode;
+              const store_name = store_info.find(
+                (elem) => elem.value == store_id,
+              )?.name;
+              if (store_name == undefined) {
+                return null;
+              }
+              const availability_info =
+                element.buyingOption.cashCarry.availability;
+              const quantity = availability_info.quantity;
+              return { store: store_name, quantity: quantity };
+            })
+            .filter((elem) => elem != null) as {
+            store: string;
+            quantity: number;
+          }[]
+        )
           .sort((a, b) => a.quantity - b.quantity)
           .reverse();
         let shark_colour = "LUMINOUS_VIVID_PINK" as ColorResolvable;
@@ -83,6 +111,9 @@ export async function execute(interaction: CommandInteraction) {
           }
         } else {
           shark_colour = "GREEN";
+        }
+        if (interaction.options.getString("stores", false) === "in-stock") {
+          sharks = sharks.filter((elem) => elem.quantity != 0);
         }
         interaction.reply({
           embeds: [
