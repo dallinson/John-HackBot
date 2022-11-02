@@ -12,6 +12,31 @@ const info = {
   description: "Locates and gives a stock count for BLAHAJ",
 };
 
+type validShark = {
+    availableForCashCarry: boolean;
+    buyingOption: {
+      cashCarry: {
+        availability: {
+          probability: {
+            thisDay: {
+              colour: { rgbDec: string; rgbHex: string; token: string };
+              messageType: string;
+            };
+            updateDateTime: string;
+          };
+          quantity: number;
+          updateDateTime: string;
+        };
+        range: { inRange: boolean };
+        unitOfMeasure: string;
+      };
+      homeDelivery: { range: { inRange: boolean } };
+    };
+    classUnitKey: { classUnitCode: string; classUnitType: string };
+    exceptions: { longTermSupplyIssue: boolean };
+    itemKey: { itemNo: string; itemType: string };
+  }
+
 export const metadata = new SlashCommandBuilder()
   .setName(info.name)
   .setDescription(info.description)
@@ -35,6 +60,10 @@ export const metadata = new SlashCommandBuilder()
         {name: "All stores", value: "all"},
         {name: "In stock only", value: "in-stock" },
       ),
+  )
+  .addBooleanOption(option =>
+    option.setName("hidden")
+      .setDescription("Should show the shark info to the channel")
   );
 
 export async function execute(interaction: CommandInteraction) {
@@ -55,33 +84,16 @@ export async function execute(interaction: CommandInteraction) {
     })
     .then(
       (data: {
-        availabilities: {
-          availableForCashCarry: boolean;
-          buyingOption: {
-            cashCarry: {
-              availability: {
-                probability: {
-                  thisDay: {
-                    colour: { rgbDec: string; rgbHex: string; token: string };
-                    messageType: string;
-                  };
-                  updateDateTime: string;
-                };
-                quantity: number;
-                updateDateTime: string;
-              };
-              range: { inRange: boolean };
-              unitOfMeasure: string;
-            };
-            homeDelivery: { range: { inRange: boolean } };
-          };
-          classUnitKey: { classUnitCode: string; classUnitType: string };
-          exceptions: { longTermSupplyIssue: boolean };
-          itemKey: { itemNo: string; itemType: string };
-        }[];
+        availabilities: any[];
       }) => {
+        let valid_sharks = [];
+        for (var elem of data.availabilities) {
+          if (isValidShark(elem)) {
+            valid_sharks.push(elem);
+          }
+        }
         let sharks = (
-          data.availabilities
+          valid_sharks
             .map((element) => {
               const store_id = element.classUnitKey.classUnitCode;
               const store_name = store_info.find(
@@ -126,7 +138,12 @@ export async function execute(interaction: CommandInteraction) {
                   .join("\n"),
               ),
           ],
+          ephemeral: interaction.options.getBoolean("hidden", false) ?? true,
         });
       },
     );
+}
+
+function isValidShark(x: any): x is validShark {
+  return (x as validShark).buyingOption.cashCarry !== undefined && (x as validShark).buyingOption.cashCarry.availability !== undefined;
 }
