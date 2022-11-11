@@ -127,10 +127,11 @@ export async function execute(interaction: CommandInteraction) {
         if (interaction.options.getString("stores", false) === "in-stock") {
           sharks = sharks.filter((elem) => elem.quantity != 0);
         }
+        const isBlahaj = (interaction.options.getString("size", false) ?? "30373588") === "30373588";
         interaction.reply({
           embeds: [
             new MessageEmbed()
-              .setTitle("BLAHAJ stock")
+              .setTitle((isBlahaj ? "Blahaj" : "Smolhaj") + " stock")
               .setColor(shark_colour)
               .setDescription(
                 sharks
